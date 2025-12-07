@@ -241,3 +241,696 @@
     .note {
       font-size: 11px;
       color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .report-footer {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+    }
+
+    .footer-totals {
+      max-width: 280px;
+    }
+
+    .footer-totals table {
+      margin-bottom: 0;
+    }
+
+    .footer-sign {
+      text-align: right;
+    }
+
+    .status-bar {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    .status-bar span {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <header class="app-header">
+    <div>
+      <h1>Laporan Penjualan (Online & Terakhir Diupdate)</h1>
+      <small>RAJA SUSU BANDUNG KOPO • Data tersimpan di Firebase (Realtime Database)</small>
+      <div class="status-bar" id="status-text">Memuat data terakhir dari server...</div>
+    </div>
+    <div class="export-buttons">
+      <button onclick="exportPDF()">
+        📄 Export ke PDF
+      </button>
+      <button class="secondary" onclick="exportImage()">
+        🖼️ Export ke Foto (PNG)
+      </button>
+      <button class="success" onclick="saveToServer()">
+        💾 Simpan ke Server
+      </button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- FORM INPUT -->
+    <div class="form-wrapper">
+      <h2>Input Laporan</h2>
+      <p class="hint">Isi angka sesuai laporan hari ini, lalu klik <b>Simpan ke Server</b>. Semua orang akan melihat data terakhir.</p>
+
+      <div class="form-section-title">Informasi Umum</div>
+      <div class="form-row">
+        <label for="input-date">Tanggal Laporan</label>
+        <input type="text" id="input-date" placeholder="contoh: 7 DESEMBER 2025" />
+      </div>
+      <div class="form-row">
+        <label for="input-kepala-toko">Kepala Toko</label>
+        <input type="text" id="input-kepala-toko" placeholder="Nama Kepala Toko" />
+      </div>
+
+      <div class="form-section-title">Metode Pembayaran</div>
+      <div class="hint">Isi angka tanpa titik/koma, nanti otomatis diformat Rupiah.</div>
+
+      <div class="form-row">
+        <label for="pay-cash">1. CASH</label>
+        <input type="number" id="pay-cash" />
+      </div>
+      <div class="form-row">
+        <label for="pay-debit-bca">2. DEBIT BCA</label>
+        <input type="number" id="pay-debit-bca" />
+      </div>
+      <div class="form-row">
+        <label for="pay-kredit-bca">3. KREDIT BCA</label>
+        <input type="number" id="pay-kredit-bca" />
+      </div>
+      <div class="form-row">
+        <label for="pay-qr-bca">4. QR BCA</label>
+        <input type="number" id="pay-qr-bca" />
+      </div>
+      <div class="form-row">
+        <label for="pay-debit-mandiri">5. DEBIT MANDIRI</label>
+        <input type="number" id="pay-debit-mandiri" />
+      </div>
+      <div class="form-row">
+        <label for="pay-qr-mandiri">6. QR MANDIRI</label>
+        <input type="number" id="pay-qr-mandiri" />
+      </div>
+      <div class="form-row">
+        <label for="pay-debit-bri">7. DEBIT BRI</label>
+        <input type="number" id="pay-debit-bri" />
+      </div>
+      <div class="form-row">
+        <label for="pay-qr-bri">8. QR BRI</label>
+        <input type="number" id="pay-qr-bri" />
+      </div>
+      <div class="form-row">
+        <label for="pay-debit-bni">9. DEBIT BNI</label>
+        <input type="number" id="pay-debit-bni" />
+      </div>
+      <div class="form-row">
+        <label for="pay-kredit-bni">10. KREDIT BNI</label>
+        <input type="number" id="pay-kredit-bni" />
+      </div>
+      <div class="form-row">
+        <label for="pay-qr-bni">11. QR BNI</label>
+        <input type="number" id="pay-qr-bni" />
+      </div>
+      <div class="form-row">
+        <label for="pay-shopeepay">12. SHOPEEPAY</label>
+        <input type="number" id="pay-shopeepay" />
+      </div>
+      <div class="form-row">
+        <label for="pay-shopee">13. SHOPEE</label>
+        <input type="number" id="pay-shopee" />
+      </div>
+
+      <div class="form-section-title">Transfer & Total per Bank</div>
+      <div class="form-row">
+        <label for="transfer-bca">TOTAL BCA</label>
+        <input type="number" id="transfer-bca" />
+      </div>
+      <div class="form-row">
+        <label for="transfer-mandiri">TOTAL MANDIRI</label>
+        <input type="number" id="transfer-mandiri" />
+      </div>
+
+      <div class="form-section-title">Ringkasan Cash</div>
+      <div class="form-row">
+        <label for="cash-receh">Receh</label>
+        <input type="number" id="cash-receh" />
+      </div>
+      <div class="form-row">
+        <label for="cash-total">Total Cash</label>
+        <input type="number" id="cash-total" />
+      </div>
+      <div class="form-row">
+        <label for="cash-plusminus">Plus Minus</label>
+        <input type="number" id="cash-plusminus" />
+      </div>
+      <div class="form-row">
+        <label for="cash-minusasli">Minus Asli</label>
+        <input type="number" id="cash-minusasli" />
+      </div>
+
+      <div class="form-section-title">Pecahan Uang Cash (Lembar)</div>
+      <div class="hint">Isi jumlah lembar, total akan dihitung otomatis.</div>
+      <div class="form-row">
+        <label for="denom-100k">100.000</label>
+        <input type="number" id="denom-100k" />
+      </div>
+      <div class="form-row">
+        <label for="denom-50k">50.000</label>
+        <input type="number" id="denom-50k" />
+      </div>
+      <div class="form-row">
+        <label for="denom-20k">20.000</label>
+        <input type="number" id="denom-20k" />
+      </div>
+      <div class="form-row">
+        <label for="denom-10k">10.000</label>
+        <input type="number" id="denom-10k" />
+      </div>
+      <div class="form-row">
+        <label for="denom-5k">5.000</label>
+        <input type="number" id="denom-5k" />
+      </div>
+
+      <div class="form-section-title">Biaya & Lainnya</div>
+      <div class="form-row">
+        <label for="biaya-parkir">Biaya Parkir</label>
+        <input type="number" id="biaya-parkir" />
+      </div>
+      <div class="form-row">
+        <label for="biaya-lebihsetoran">Lebih Setoran</label>
+        <input type="number" id="biaya-lebihsetoran" />
+      </div>
+      <div class="form-row">
+        <label for="piutang">Piutang Penjualan</label>
+        <input type="number" id="piutang" />
+      </div>
+      <div class="form-row">
+        <label for="subtotal">Sub Total</label>
+        <input type="number" id="subtotal" />
+      </div>
+      <div class="form-row">
+        <label for="grandtotal">Total Akhir</label>
+        <input type="number" id="grandtotal" />
+      </div>
+    </div>
+
+    <!-- PREVIEW LAPORAN (untuk export PDF/PNG) -->
+    <div id="report-area" class="report-wrapper">
+      <div class="report-header">
+        <h2 id="report-title"></h2>
+        <h3 id="report-store"></h3>
+        <div class="date" id="report-date"></div>
+      </div>
+
+      <div class="report-grid">
+        <!-- KIRI -->
+        <div>
+          <h4 class="section-title">Metode Pembayaran</h4>
+          <table id="payment-table">
+            <thead>
+            <tr>
+              <th style="width: 40px;">No</th>
+              <th>Item</th>
+              <th style="width: 60px;">&rarr;</th>
+              <th class="numeric">Jumlah Total</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <h4 class="section-title mt-12">Transfer & Lainnya</h4>
+          <table id="transfer-table">
+            <thead>
+            <tr>
+              <th>Keterangan</th>
+              <th class="numeric">Nominal</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <h4 class="section-title mt-12">Biaya</h4>
+          <table id="biaya-table">
+            <thead>
+            <tr>
+              <th>Uraian</th>
+              <th class="numeric">Nominal</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="note" id="biaya-total-note"></div>
+
+          <h4 class="section-title mt-12">Piutang Penjualan</h4>
+          <table id="piutang-table">
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- KANAN -->
+        <div>
+          <h4 class="section-title">Breakdown Uang Cash</h4>
+          <table id="denom-table">
+            <thead>
+            <tr>
+              <th>Nominal</th>
+              <th class="numeric">Lembar</th>
+              <th class="numeric">Total</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <h4 class="section-title mt-12">Ringkasan Cash</h4>
+          <table id="cash-summary-table">
+            <tbody></tbody>
+          </table>
+
+          <div class="note">
+            Angka di atas diambil dari data terakhir yang tersimpan di server.
+          </div>
+        </div>
+      </div>
+
+      <div class="report-footer">
+        <div class="footer-totals">
+          <table>
+            <tbody>
+            <tr>
+              <td>Sub Total</td>
+              <td class="numeric" id="subtotal-cell"></td>
+            </tr>
+            <tr>
+              <td><strong>Total Akhir</strong></td>
+              <td class="numeric" id="grandtotal-cell"></td>
+            </tr>
+            </tbody>
+          </table>
+          <div class="note mt-8" id="updated-at-note">
+            Terakhir diperbarui: -
+          </div>
+        </div>
+
+        <div class="footer-sign">
+          <div>Paraf Kepala Toko:</div>
+          <strong id="kepala-toko-name"></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Library untuk screenshot & PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  // === KONFIGURASI FIREBASE DARI KAMU ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcDwcdXRnkLaFpYT_kbbjfDwDY-zxoWWY",
+    authDomain: "laporan-kopo.firebaseapp.com",
+    projectId: "laporan-kopo",
+    storageBucket: "laporan-kopo.firebasestorage.app",
+    messagingSenderId: "556164034130",
+    appId: "1:556164034130:web:e9f092dcc77925373c398b",
+    measurementId: "G-ZTW27GVCQP",
+    databaseURL: "https://laporan-kopo-default-rtdb.asia-southeast1.firebasedatabase.app"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // === DATA DEFAULT (seperti contoh Excel) ===
+  const defaultReportData = {
+    title: "LAPORAN PENJUALAN",
+    storeName: "RAJA SUSU BANDUNG KOPO",
+    date: "7 DESEMBER 2025",
+    payments: [
+      { no: 1, item: "CASH",          jumlahTotal: 1322101 },
+      { no: 2, item: "DEBIT BCA",     jumlahTotal: 91000   },
+      { no: 3, item: "KREDIT BCA",    jumlahTotal: 1369650 },
+      { no: 4, item: "QR BCA",        jumlahTotal: 958900  },
+      { no: 5, item: "DEBIT MANDIRI", jumlahTotal: 413300  },
+      { no: 6, item: "QR MANDIRI",    jumlahTotal: 1591450 },
+      { no: 7, item: "DEBIT BRI",     jumlahTotal: null    },
+      { no: 8, item: "QR BRI",        jumlahTotal: 426000  },
+      { no: 9, item: "DEBIT BNI",     jumlahTotal: 130000  },
+      { no:10, item: "KREDIT BNI",    jumlahTotal: null    },
+      { no:11, item: "QR BNI",        jumlahTotal: null    },
+      { no:12, item: "SHOPEEPAY",     jumlahTotal: 999900  },
+      { no:13, item: "SHOPEE",        jumlahTotal: 7205702 }
+    ],
+    transfers: [
+      { keterangan: "TOTAL BCA",     nominal: 666000 },
+      { keterangan: "TOTAL MANDIRI", nominal: 0 }
+    ],
+    cashSummary: [
+      { label: "Receh",             value: 2600 },
+      { label: "Total Cash",        value: 1054600 },
+      { label: "Plus Minus",        value: 267501 },
+      { label: "Minus Asli",        value: 3267 },
+      { label: "Uang Kardus",       value: null },
+      { label: "Kekurangan Setor",  value: null },
+      { label: "Setoran Sekarang",  value: null }
+    ],
+    denominations: [
+      { nominal: 100000, lembar: 5 },
+      { nominal: 50000,  lembar: 5 },
+      { nominal: 20000,  lembar: 0 },
+      { nominal: 10000,  lembar: 14 },
+      { nominal: 5000,   lembar: 26 }
+    ],
+    biaya: [
+      { keterangan: "Parkir",        nominal: 2000 },
+      { keterangan: "Lebih setoran", nominal: 49963 }
+    ],
+    totalBiaya: 51963,
+    piutangPenjualan: 0,
+    subTotal: 15174003,
+    grandTotal: 15225966,
+    kepalaToko: "FAHRUROZI",
+    updatedAt: new Date().toISOString()
+  };
+
+  function formatRupiah(value) {
+    if (value === null || value === undefined || value === "") return "-";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0
+    }).format(Number(value));
+  }
+
+  function formatTanggalDisplay(str) {
+    if (!str) return "-";
+    return str;
+  }
+
+  // === Render laporan ke HTML ===
+  function renderReport(data) {
+    document.getElementById("report-title").textContent = data.title || "LAPORAN PENJUALAN";
+    document.getElementById("report-store").textContent = data.storeName || "RAJA SUSU BANDUNG KOPO";
+    document.getElementById("report-date").textContent = formatTanggalDisplay(data.date);
+
+    const paymentBody = document.querySelector("#payment-table tbody");
+    paymentBody.innerHTML = "";
+    (data.payments || []).forEach(p => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${p.no}</td>
+        <td>${p.item}</td>
+        <td style="text-align:center;">&rarr;</td>
+        <td class="numeric">${p.jumlahTotal ? formatRupiah(p.jumlahTotal) : "-"}</td>
+      `;
+      paymentBody.appendChild(tr);
+    });
+
+    const transferBody = document.querySelector("#transfer-table tbody");
+    transferBody.innerHTML = "";
+    (data.transfers || []).forEach(t => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${t.keterangan}</td>
+        <td class="numeric">${formatRupiah(t.nominal)}</td>
+      `;
+      transferBody.appendChild(tr);
+    });
+
+    const biayaBody = document.querySelector("#biaya-table tbody");
+    biayaBody.innerHTML = "";
+    (data.biaya || []).forEach(b => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${b.keterangan}</td>
+        <td class="numeric">${formatRupiah(b.nominal)}</td>
+      `;
+      biayaBody.appendChild(tr);
+    });
+    document.getElementById("biaya-total-note").textContent =
+      "Total biaya: " + formatRupiah(data.totalBiaya);
+
+    const piutangBody = document.querySelector("#piutang-table tbody");
+    piutangBody.innerHTML = `
+      <tr>
+        <td>Piutang Penjualan</td>
+        <td class="numeric">${formatRupiah(data.piutangPenjualan)}</td>
+      </tr>
+    `;
+
+    const denomBody = document.querySelector("#denom-table tbody");
+    denomBody.innerHTML = "";
+    (data.denominations || []).forEach(d => {
+      const total = (Number(d.nominal) || 0) * (Number(d.lembar) || 0);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${formatRupiah(d.nominal)}</td>
+        <td class="numeric">${d.lembar || 0}</td>
+        <td class="numeric">${formatRupiah(total)}</td>
+      `;
+      denomBody.appendChild(tr);
+    });
+
+    const cashBody = document.querySelector("#cash-summary-table tbody");
+    cashBody.innerHTML = "";
+    (data.cashSummary || []).forEach(c => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${c.label}</td>
+        <td class="numeric">${c.value ? formatRupiah(c.value) : "-"}</td>
+      `;
+      cashBody.appendChild(tr);
+    });
+
+    document.getElementById("subtotal-cell").textContent = formatRupiah(data.subTotal);
+    document.getElementById("grandtotal-cell").textContent = formatRupiah(data.grandTotal);
+    document.getElementById("kepala-toko-name").textContent = data.kepalaToko || "-";
+
+    const updatedAtNote = document.getElementById("updated-at-note");
+    if (data.updatedAt) {
+      const dt = new Date(data.updatedAt);
+      updatedAtNote.textContent = "Terakhir diperbarui: " + dt.toLocaleString("id-ID");
+    } else {
+      updatedAtNote.textContent = "Terakhir diperbarui: -";
+    }
+  }
+
+  // === Isi form dari data ===
+  function fillForm(data) {
+    document.getElementById("input-date").value = data.date || "";
+    document.getElementById("input-kepala-toko").value = data.kepalaToko || "";
+
+    const p = (idx) => (data.payments && data.payments[idx]) ? data.payments[idx].jumlahTotal || "" : "";
+
+    document.getElementById("pay-cash").value          = p(0);
+    document.getElementById("pay-debit-bca").value     = p(1);
+    document.getElementById("pay-kredit-bca").value    = p(2);
+    document.getElementById("pay-qr-bca").value        = p(3);
+    document.getElementById("pay-debit-mandiri").value = p(4);
+    document.getElementById("pay-qr-mandiri").value    = p(5);
+    document.getElementById("pay-debit-bri").value     = p(6);
+    document.getElementById("pay-qr-bri").value        = p(7);
+    document.getElementById("pay-debit-bni").value     = p(8);
+    document.getElementById("pay-kredit-bni").value    = p(9);
+    document.getElementById("pay-qr-bni").value        = p(10);
+    document.getElementById("pay-shopeepay").value     = p(11);
+    document.getElementById("pay-shopee").value        = p(12);
+
+    const t = (idx) => (data.transfers && data.transfers[idx]) ? data.transfers[idx].nominal || "" : "";
+    document.getElementById("transfer-bca").value = t(0);
+    document.getElementById("transfer-mandiri").value = t(1);
+
+    const c = (label) => {
+      const cs = (data.cashSummary || []).find(x => x.label === label);
+      return cs ? cs.value || "" : "";
+    };
+    document.getElementById("cash-receh").value     = c("Receh");
+    document.getElementById("cash-total").value     = c("Total Cash");
+    document.getElementById("cash-plusminus").value = c("Plus Minus");
+    document.getElementById("cash-minusasli").value = c("Minus Asli");
+
+    const d = (nom) => {
+      const dn = (data.denominations || []).find(x => x.nominal === nom);
+      return dn ? dn.lembar || "" : "";
+    };
+    document.getElementById("denom-100k").value = d(100000);
+    document.getElementById("denom-50k").value  = d(50000);
+    document.getElementById("denom-20k").value  = d(20000);
+    document.getElementById("denom-10k").value  = d(10000);
+    document.getElementById("denom-5k").value   = d(5000);
+
+    const biaya = data.biaya || [];
+    const b1 = biaya.find(x => x.keterangan.toLowerCase().includes("parkir"));
+    const b2 = biaya.find(x => x.keterangan.toLowerCase().includes("lebih"));
+
+    document.getElementById("biaya-parkir").value       = b1 ? b1.nominal || "" : "";
+    document.getElementById("biaya-lebihsetoran").value = b2 ? b2.nominal || "" : "";
+    document.getElementById("piutang").value            = data.piutangPenjualan || "";
+    document.getElementById("subtotal").value           = data.subTotal || "";
+    document.getElementById("grandtotal").value         = data.grandTotal || "";
+  }
+
+  // === Ambil data dari form dan buat objek report ===
+  function collectFromForm() {
+    const getNum = (id) => {
+      const v = document.getElementById(id).value;
+      return v === "" ? null : Number(v);
+    };
+
+    const payments = [
+      { no: 1, item: "CASH",          jumlahTotal: getNum("pay-cash") },
+      { no: 2, item: "DEBIT BCA",     jumlahTotal: getNum("pay-debit-bca") },
+      { no: 3, item: "KREDIT BCA",    jumlahTotal: getNum("pay-kredit-bca") },
+      { no: 4, item: "QR BCA",        jumlahTotal: getNum("pay-qr-bca") },
+      { no: 5, item: "DEBIT MANDIRI", jumlahTotal: getNum("pay-debit-mandiri") },
+      { no: 6, item: "QR MANDIRI",    jumlahTotal: getNum("pay-qr-mandiri") },
+      { no: 7, item: "DEBIT BRI",     jumlahTotal: getNum("pay-debit-bri") },
+      { no: 8, item: "QR BRI",        jumlahTotal: getNum("pay-qr-bri") },
+      { no: 9, item: "DEBIT BNI",     jumlahTotal: getNum("pay-debit-bni") },
+      { no:10, item: "KREDIT BNI",    jumlahTotal: getNum("pay-kredit-bni") },
+      { no:11, item: "QR BNI",        jumlahTotal: getNum("pay-qr-bni") },
+      { no:12, item: "SHOPEEPAY",     jumlahTotal: getNum("pay-shopeepay") },
+      { no:13, item: "SHOPEE",        jumlahTotal: getNum("pay-shopee") }
+    ];
+
+    const transfers = [
+      { keterangan: "TOTAL BCA",     nominal: getNum("transfer-bca") },
+      { keterangan: "TOTAL MANDIRI", nominal: getNum("transfer-mandiri") }
+    ];
+
+    const cashSummary = [
+      { label: "Receh",             value: getNum("cash-receh") },
+      { label: "Total Cash",        value: getNum("cash-total") },
+      { label: "Plus Minus",        value: getNum("cash-plusminus") },
+      { label: "Minus Asli",        value: getNum("cash-minusasli") },
+      { label: "Uang Kardus",       value: null },
+      { label: "Kekurangan Setor",  value: null },
+      { label: "Setoran Sekarang",  value: null }
+    ];
+
+    const denominations = [
+      { nominal: 100000, lembar: getNum("denom-100k") || 0 },
+      { nominal: 50000,  lembar: getNum("denom-50k") || 0 },
+      { nominal: 20000,  lembar: getNum("denom-20k") || 0 },
+      { nominal: 10000,  lembar: getNum("denom-10k") || 0 },
+      { nominal: 5000,   lembar: getNum("denom-5k")  || 0 }
+    ];
+
+    const biaya = [
+      { keterangan: "Parkir",        nominal: getNum("biaya-parkir") || 0 },
+      { keterangan: "Lebih setoran", nominal: getNum("biaya-lebihsetoran") || 0 }
+    ];
+
+    const totalBiaya = biaya.reduce((sum, b) => sum + (b.nominal || 0), 0);
+
+    const report = {
+      title: "LAPORAN PENJUALAN",
+      storeName: "RAJA SUSU BANDUNG KOPO",
+      date: document.getElementById("input-date").value || "",
+      payments,
+      transfers,
+      cashSummary,
+      denominations,
+      biaya,
+      totalBiaya,
+      piutangPenjualan: getNum("piutang") || 0,
+      subTotal: getNum("subtotal") || 0,
+      grandTotal: getNum("grandtotal") || 0,
+      kepalaToko: document.getElementById("input-kepala-toko").value || "",
+      updatedAt: new Date().toISOString()
+    };
+
+    return report;
+  }
+
+  // === Load data terakhir dari Firebase saat halaman dibuka ===
+  function loadFromServer() {
+    const status = document.getElementById("status-text");
+    status.textContent = "Memuat data terakhir dari server...";
+
+    db.ref("latestReport").once("value")
+      .then((snapshot) => {
+        let data;
+        if (snapshot.exists()) {
+          data = snapshot.val();
+          status.innerHTML = "Menampilkan data terakhir dari server. <span>(Online)</span>";
+        } else {
+          data = defaultReportData;
+          status.innerHTML = "Belum ada data di server. Menampilkan contoh awal. <span>(Offline Default)</span>";
+        }
+        renderReport(data);
+        fillForm(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        status.textContent = "Gagal memuat dari server, menggunakan data default.";
+        renderReport(defaultReportData);
+        fillForm(defaultReportData);
+      });
+  }
+
+  // === Simpan ke Firebase ===
+  function saveToServer() {
+    const status = document.getElementById("status-text");
+    const data = collectFromForm();
+
+    status.textContent = "Menyimpan ke server...";
+    db.ref("latestReport").set(data)
+      .then(() => {
+        status.innerHTML = "Berhasil disimpan ke server. <span>Semua orang melihat versi ini.</span>";
+        alert("Laporan berhasil disimpan ke server!");
+        renderReport(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        status.textContent = "Gagal menyimpan ke server. Coba lagi.";
+        alert("Gagal menyimpan ke server. Cek koneksi internet atau konfigurasi Firebase.");
+      });
+  }
+
+  // === Export ke PDF ===
+  async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
+    const reportElement = document.getElementById("report-area");
+
+    const canvas = await html2canvas(reportElement, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const imgProps = doc.getImageProperties(imgData);
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    doc.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    doc.save("laporan-penjualan.pdf");
+  }
+
+  // === Export ke Foto (PNG) ===
+  async function exportImage() {
+    const reportElement = document.getElementById("report-area");
+    const canvas = await html2canvas(reportElement, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = "laporan-penjualan.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Jalankan saat halaman pertama kali dibuka
+  loadFromServer();
+</script>
+</body>
+</html>
