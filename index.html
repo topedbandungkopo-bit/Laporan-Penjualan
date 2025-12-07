@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Laporan Penjualan Raja Susu Bandung Kopo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f3f4f6;
+      color: #111827;
+      padding: 20px;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .app-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .app-header small {
+      color: #6b7280;
+    }
+
+    .export-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      background: #2563eb;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    button:hover {
+      filter: brightness(0.95);
+    }
+
+    /* Kartu laporan yang akan di-export */
+    .report-wrapper {
+      margin-top: 16px;
+      padding: 24px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .report-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .report-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .report-header .date {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .report-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    h4.section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      color: #374151;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 6px 8px;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    td.numeric {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mt-8 {
+      margin-top: 8px;
+    }
+
+    .mt-12 {
+      margin-top: 12px;
+    }
+
+    .note {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .report-footer {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+    }
+
+    .footer-totals {
+      max-width: 280px;
+    }
+
+    .footer-totals table {
+      margin-bottom: 0;
+    }
+
+    .footer-sign {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <header class="app-header">
+    <div>
+      <h1>Laporan Penjualan (Contoh dari Excel)</h1>
+      <small>RAJA SUSU BANDUNG KOPO • Data bisa kamu ganti di bagian JavaScript</small>
+    </div>
+    <div class="export-buttons">
+      <button onclick="exportPDF()">
+        📄 Export ke PDF
+      </button>
+      <button class="secondary" onclick="exportImage()">
+        🖼️ Export ke Foto (PNG)
+      </button>
+    </div>
+  </header>
+
+  <!-- BAGIAN INI yang akan di-export ke PDF / Foto -->
+  <div id="report-area" class="report-wrapper">
+    <div class="report-header">
+      <h2 id="report-title"></h2>
+      <h3 id="report-store"></h3>
+      <div class="date" id="report-date"></div>
+    </div>
+
+    <div class="report-grid">
+      <!-- KIRI: Metode pembayaran, transfer, biaya -->
+      <div>
+        <h4 class="section-title">Metode Pembayaran</h4>
+        <table id="payment-table">
+          <thead>
+          <tr>
+            <th style="width: 40px;">No</th>
+            <th>Item</th>
+            <th style="width: 60px;">&rarr;</th>
+            <th class="numeric">Jumlah Total</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h4 class="section-title mt-12">Transfer & Lainnya</h4>
+        <table id="transfer-table">
+          <thead>
+          <tr>
+            <th>Keterangan</th>
+            <th class="numeric">Nominal</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h4 class="section-title mt-12">Biaya</h4>
+        <table id="biaya-table">
+          <thead>
+          <tr>
+            <th>Uraian</th>
+            <th class="numeric">Nominal</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="note" id="biaya-total-note"></div>
+
+        <h4 class="section-title mt-12">Piutang Penjualan</h4>
+        <table id="piutang-table">
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- KANAN: Breakdown cash, ringkasan cash -->
+      <div>
+        <h4 class="section-title">Breakdown Uang Cash</h4>
+        <table id="denom-table">
+          <thead>
+          <tr>
+            <th>Nominal</th>
+            <th class="numeric">Lembar</th>
+            <th class="numeric">Total</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h4 class="section-title mt-12">Ringkasan Cash</h4>
+        <table id="cash-summary-table">
+          <tbody></tbody>
+        </table>
+
+        <div class="note">
+          Angka di atas diambil dari format Excel contoh (Receh, Total Cash, Plus/Minus, dll).
+        </div>
+      </div>
+    </div>
+
+    <div class="report-footer">
+      <div class="footer-totals">
+        <table>
+          <tbody>
+          <tr>
+            <td>Sub Total</td>
+            <td class="numeric" id="subtotal-cell"></td>
+          </tr>
+          <tr>
+            <td><strong>Total Akhir</strong></td>
+            <td class="numeric" id="grandtotal-cell"></td>
+          </tr>
+          </tbody>
+        </table>
+        <div class="note mt-8">
+          Angka mengikuti contoh file "Testing laporan penjualan.xlsx".  
+          Kamu bisa ubah data di JavaScript agar sesuai laporan harian yang lain.
+        </div>
+      </div>
+
+      <div class="footer-sign">
+        <div>Paraf Kepala Toko:</div>
+        <strong id="kepala-toko-name"></strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Library untuk screenshot & PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  // === DATA CONTOH DIAMBIL DARI FILE EXCEL KAMU ===
+  const reportData = {
+    title: "LAPORAN PENJUALAN",
+    storeName: "RAJA SUSU BANDUNG KOPO",
+    date: "7 DESEMBER 2025",
+
+    // Pecahan uang (dari sheet Excel)
+    denominations: [
+      { nominal: 100000, lembar: 5, total: 500000 },
+      { nominal: 50000,  lembar: 5, total: 250000 },
+      { nominal: 20000,  lembar: 0, total: 0 },        // di Excel total 0
+      { nominal: 10000,  lembar: 14, total: 140000 },
+      { nominal: 5000,   lembar: 26, total: 130000 }
+    ],
+
+    // Metode pembayaran utama (kolom kiri)
+    payments: [
+      { no: 1, item: "CASH",          jumlahTotal: 1322101 },
+      { no: 2, item: "DEBIT BCA",     jumlahTotal: 91000   },
+      { no: 3, item: "KREDIT BCA",    jumlahTotal: 1369650 },
+      { no: 4, item: "QR BCA",        jumlahTotal: 958900  },
+      { no: 5, item: "DEBIT MANDIRI", jumlahTotal: 413300  },
+      { no: 6, item: "QR MANDIRI",    jumlahTotal: 1591450 },
+      { no: 7, item: "DEBIT BRI",     jumlahTotal: null    },
+      { no: 8, item: "QR BRI",        jumlahTotal: 426000  },
+      { no: 9, item: "DEBIT BNI",     jumlahTotal: 130000  },
+      { no:10, item: "KREDIT BNI",    jumlahTotal: null    },
+      { no:11, item: "QR BNI",        jumlahTotal: null    },
+      { no:12, item: "SHOPEEPAY",     jumlahTotal: 999900  },
+      { no:13, item: "SHOPEE",        jumlahTotal: 7205702 }
+    ],
+
+    // Transfer & total per bank (disederhanakan)
+    transfers: [
+      { keterangan: "TOTAL BCA",     nominal: 666000 },
+      { keterangan: "TOTAL MANDIRI", nominal: 0 }
+    ],
+
+    // Ringkasan cash (kanan) diambil dari Excel
+    cashSummary: [
+      { label: "Receh",             value: 2600 },
+      { label: "Total Cash",        value: 1054600 },
+      { label: "Plus Minus",        value: 267501 },
+      { label: "Minus Asli",        value: 3267 },
+      { label: "Uang Kardus",       value: null },
+      { label: "Kekurangan Setor",  value: null },
+      { label: "Setoran Sekarang",  value: null }
+    ],
+
+    // Biaya (sheet BIAYA di Excel)
+    biaya: [
+      { keterangan: "Parkir",          nominal: 2000 },
+      { keterangan: "Lebih setoran",   nominal: 49963 }
+    ],
+    totalBiaya: 51963,
+
+    piutangPenjualan: 0,
+
+    subTotal: 15174003,
+    grandTotal: 15225966,
