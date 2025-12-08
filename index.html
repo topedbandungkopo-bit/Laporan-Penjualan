@@ -671,7 +671,7 @@
     const grand = subtotal - totalBiaya;
     document.getElementById("grandtotal").textContent = fmt(grand);
 
-    const cashSeharusnya = grand - totalNonCash - totalTransfer - val("piutang");
+    const cashSeharusnya = totalPenjualan - totalNonCash - totalTransfer - totalBiaya;
     const plusMinus = cashFisik - cashSeharusnya;
     document.getElementById("plusminus").textContent = fmt(plusMinus);
 
@@ -1059,7 +1059,7 @@ function hitung() {
         num(recehEl.value);
 
     // 9. CASH SEHARUSNYA
-    const cashSeharusnya = grandTotal - totalNonCash - totalTransfer - piutang;
+    const cashSeharusnya = totalPenjualan - totalNonCash - totalTransfer - totalBiaya;
 
     // 10. PLUS MINUS
     const plusMinus = cashFisik - cashSeharusnya;
