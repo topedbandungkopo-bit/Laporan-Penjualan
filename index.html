@@ -906,5 +906,338 @@
 
   calculate();
 </script>
+  <script>
+// ========== Helper: Format angka ==========
+function num(v) {
+    v = parseFloat(v);
+    return isNaN(v) ? 0 : v;
+}
+
+function format(v) {
+    return num(v).toLocaleString("id-ID");
+}
+
+// ============================
+// Ambil elemen input
+// ============================
+const totalPenjualanEl = document.getElementById("totalPenjualan");
+
+const shopeePayEl = document.getElementById("shopeePay");
+const shopeeEl = document.getElementById("shopee");
+
+const debitBcaEl = document.getElementById("debitBca");
+const kreditBcaEl = document.getElementById("kreditBca");
+const qrBcaEl = document.getElementById("qrBca");
+
+const debitMandiriEl = document.getElementById("debitMandiri");
+const qrMandiriEl = document.getElementById("qrMandiri");
+
+const debitBriEl = document.getElementById("debitBri");
+const qrBriEl = document.getElementById("qrBri");
+
+const debitBniEl = document.getElementById("debitBni");
+const kreditBniEl = document.getElementById("kreditBni");
+const qrBniEl = document.getElementById("qrBni");
+
+const recehEl = document.getElementById("receh");
+
+// Pecahan
+const p100El = document.getElementById("p100");
+const p50El = document.getElementById("p50");
+const p20El = document.getElementById("p20");
+const p10El = document.getElementById("p10");
+const p5El = document.getElementById("p5");
+const p2El = document.getElementById("p2");
+const p1El = document.getElementById("p1");
+
+// Piutang
+const piutangEl = document.getElementById("piutang");
+
+// Dynamic tables
+const biayaTable = document.getElementById("biayaTable");
+const btnAddBiaya = document.getElementById("addBiaya");
+
+const bcaTable = document.getElementById("bcaTable");
+const btnAddBca = document.getElementById("addBca");
+
+const mandiriTable = document.getElementById("mandiriTable");
+const btnAddMandiri = document.getElementById("addMandiri");
+
+
+// ============================
+// Tambah Dynamic Row
+// ============================
+function addRow(table, max) {
+    if (table.rows.length >= max) return alert("Maksimal " + max + " baris!");
+
+    let row = table.insertRow(-1);
+
+    let c1 = row.insertCell(0);
+    let c2 = row.insertCell(1);
+    let c3 = row.insertCell(2);
+
+    c1.innerHTML = `<input type="text" class="din-input">`;
+    c2.innerHTML = `<input type="number" class="din-input num">`;
+    c3.innerHTML = `<button class="btn-delete" onclick="this.parentNode.parentNode.remove(); hitung();">Hapus</button>`;
+}
+
+// Tombol tambah
+btnAddBiaya.onclick = () => addRow(biayaTable, 10);
+btnAddBca.onclick = () => addRow(bcaTable, 10);
+btnAddMandiri.onclick = () => addRow(mandiriTable, 10);
+
+
+// ============================
+// HITUNG AUTOMATIS
+// ============================
+function hitung() {
+
+    // 1. TOTAL PENJUALAN
+    const totalPenjualan = num(totalPenjualanEl.value);
+
+    // 2. TOTAL NON-CASH
+    const totalNonCash =
+        num(shopeePayEl.value) +
+        num(shopeeEl.value) +
+        num(debitBcaEl.value) +
+        num(kreditBcaEl.value) +
+        num(qrBcaEl.value) +
+        num(debitMandiriEl.value) +
+        num(qrMandiriEl.value) +
+        num(debitBriEl.value) +
+        num(qrBriEl.value) +
+        num(debitBniEl.value) +
+        num(kreditBniEl.value) +
+        num(qrBniEl.value);
+
+    // 3. TOTAL TRANSFER BCA + MANDIRI (DARI TABEL)
+    let totalTransferBca = 0;
+    for (let r of bcaTable.rows) {
+        totalTransferBca += num(r.cells[1].children[0].value);
+    }
+
+    let totalTransferMandiri = 0;
+    for (let r of mandiriTable.rows) {
+        totalTransferMandiri += num(r.cells[1].children[0].value);
+    }
+
+    const totalTransfer = totalTransferBca + totalTransferMandiri;
+
+    // 4. TOTAL BIAYA
+    let totalBiaya = 0;
+    for (let r of biayaTable.rows) {
+        totalBiaya += num(r.cells[1].children[0].value);
+    }
+
+    // 5. PIUTANG
+    const piutang = num(piutangEl.value);
+
+    // 6. SUBTOTAL = total penjualan (kotor)
+    const subtotal = totalPenjualan;
+
+    // 7. GRAND TOTAL = TOTAL PENJUALAN - biaya
+    const grandTotal = subtotal - totalBiaya;
+
+    // 8. CASH FISIK = pecahan + receh
+    const cashFisik =
+        (num(p100El.value) * 100000) +
+        (num(p50El.value) * 50000) +
+        (num(p20El.value) * 20000) +
+        (num(p10El.value) * 10000) +
+        (num(p5El.value) * 5000) +
+        (num(p2El.value) * 2000) +
+        (num(p1El.value) * 1000) +
+        num(recehEl.value);
+
+    // 9. CASH SEHARUSNYA
+    const cashSeharusnya = grandTotal - totalNonCash - totalTransfer - piutang;
+
+    // 10. PLUS MINUS
+    const plusMinus = cashFisik - cashSeharusnya;
+
+    // 11. MINUS ASLI
+    const minusAsli = plusMinus < 0 ? Math.abs(plusMinus) : 0;
+
+    // =========================
+    // TAMPILKAN DI LAPORAN
+    // =========================
+    document.getElementById("r_totalPenjualan").innerText = format(totalPenjualan);
+    document.getElementById("r_totalNonCash").innerText = format(totalNonCash);
+    document.getElementById("r_totalTransfer").innerText = format(totalTransfer);
+    document.getElementById("r_totalBiaya").innerText = format(totalBiaya);
+    document.getElementById("r_subtotal").innerText = format(subtotal);
+    document.getElementById("r_grandTotal").innerText = format(grandTotal);
+    document.getElementById("r_cashFisik").innerText = format(cashFisik);
+    document.getElementById("r_cashSeharusnya").innerText = format(cashSeharusnya);
+    document.getElementById("r_plusminus").innerText = format(plusMinus);
+    document.getElementById("r_minusAsli").innerText = format(minusAsli);
+
+}
+
+document.addEventListener("input", hitung);
+
+
+// ============================
+// EXPORT PNG
+// ============================
+async function exportPNG() {
+    const laporan = document.getElementById("laporan");
+    const canvas = await html2canvas(laporan);
+    const link = document.createElement("a");
+    link.download = "laporan.png";
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+// ============================
+// EXPORT PDF
+// ============================
+async function exportPDF() {
+    const laporan = document.getElementById("laporan");
+    const canvas = await html2canvas(laporan);
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    const w = pdf.internal.pageSize.getWidth();
+    const h = (canvas.height * w) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+    pdf.save("laporan.pdf");
+}
+
+// ============================
+// SAVE FIREBASE
+// ============================
+function saveServer() {
+    const data = {
+        totalPenjualan: totalPenjualanEl.value,
+        shopeePay: shopeePayEl.value,
+        shopee: shopeeEl.value,
+        debitBca: debitBcaEl.value,
+        kreditBca: kreditBcaEl.value,
+        qrBca: qrBcaEl.value,
+        debitMandiri: debitMandiriEl.value,
+        qrMandiri: qrMandiriEl.value,
+        debitBri: debitBriEl.value,
+        qrBri: qrBriEl.value,
+        debitBni: debitBniEl.value,
+        kreditBni: kreditBniEl.value,
+        qrBni: qrBniEl.value,
+        receh: recehEl.value,
+        p100: p100El.value,
+        p50: p50El.value,
+        p20: p20El.value,
+        p10: p10El.value,
+        p5: p5El.value,
+        p2: p2El.value,
+        p1: p1El.value,
+        piutang: piutangEl.value,
+        biaya: [],
+        transferBca: [],
+        transferMandiri: []
+    };
+
+    for (let r of biayaTable.rows) {
+        data.biaya.push({
+            nama: r.cells[0].children[0].value,
+            nominal: r.cells[1].children[0].value
+        });
+    }
+
+    for (let r of bcaTable.rows) {
+        data.transferBca.push({
+            nama: r.cells[0].children[0].value,
+            nominal: r.cells[1].children[0].value
+        });
+    }
+
+    for (let r of mandiriTable.rows) {
+        data.transferMandiri.push({
+            nama: r.cells[0].children[0].value,
+            nominal: r.cells[1].children[0].value
+        });
+    }
+
+    db.ref("laporan").set(data);
+    alert("Data berhasil disimpan!");
+}
+
+// ============================
+// LOAD FIREBASE
+// ============================
+db.ref("laporan").on("value", snap => {
+    if (!snap.exists()) return;
+
+    const d = snap.val();
+
+    totalPenjualanEl.value = d.totalPenjualan || 0;
+
+    shopeePayEl.value = d.shopeePay || 0;
+    shopeeEl.value = d.shopee || 0;
+
+    debitBcaEl.value = d.debitBca || 0;
+    kreditBcaEl.value = d.kreditBca || 0;
+    qrBcaEl.value = d.qrBca || 0;
+
+    debitMandiriEl.value = d.debitMandiri || 0;
+    qrMandiriEl.value = d.qMandiri || 0;
+
+    debitBriEl.value = d.debitBri || 0;
+    qrBriEl.value = d.qrBri || 0;
+
+    debitBniEl.value = d.debitBni || 0;
+    kreditBniEl.value = d.kreditBni || 0;
+    qrBniEl.value = d.qrBni || 0;
+
+    recehEl.value = d.receh || 0;
+
+    p100El.value = d.p100 || 0;
+    p50El.value = d.p50 || 0;
+    p20El.value = d.p20 || 0;
+    p10El.value = d.p10 || 0;
+    p5El.value = d.p5 || 0;
+    p2El.value = d.p2 || 0;
+    p1El.value = d.p1 || 0;
+
+    piutangEl.value = d.piutang || 0;
+
+    // load biaya
+    biayaTable.innerHTML = "";
+    if (d.biaya) {
+        d.biaya.forEach(x => {
+            let r = biayaTable.insertRow(-1);
+            r.insertCell(0).innerHTML = `<input class="din-input" value="${x.nama}">`;
+            r.insertCell(1).innerHTML = `<input class="din-input num" value="${x.nominal}">`;
+            r.insertCell(2).innerHTML = `<button class="btn-delete" onclick="this.parentNode.parentNode.remove(); hitung();">Hapus</button>`;
+        });
+    }
+
+    // load BCA
+    bcaTable.innerHTML = "";
+    if (d.transferBca) {
+        d.transferBca.forEach(x => {
+            let r = bcaTable.insertRow(-1);
+            r.insertCell(0).innerHTML = `<input class="din-input" value="${x.nama}">`;
+            r.insertCell(1).innerHTML = `<input class="din-input num" value="${x.nominal}">`;
+            r.insertCell(2).innerHTML = `<button class="btn-delete" onclick="this.parentNode.parentNode.remove(); hitung();">Hapus</button>`;
+        });
+    }
+
+    // load MANDIRI
+    mandiriTable.innerHTML = "";
+    if (d.transferMandiri) {
+        d.transferMandiri.forEach(x => {
+            let r = mandiriTable.insertRow(-1);
+            r.insertCell(0).innerHTML = `<input class="din-input" value="${x.nama}">`;
+            r.insertCell(1).innerHTML = `<input class="din-input num" value="${x.nominal}">`;
+            r.insertCell(2).innerHTML = `<button class="btn-delete" onclick="this.parentNode.parentNode.remove(); hitung();">Hapus</button>`;
+        });
+    }
+
+    hitung();
+});
+
+</script>
 </body>
 </html>
+
