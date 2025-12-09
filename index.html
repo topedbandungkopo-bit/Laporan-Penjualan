@@ -565,6 +565,7 @@
           <tr><td>Total Transfer</td><td id="total-transfer" class="num">0</td></tr>
           <tr><td>Total Biaya</td><td id="total-biaya" class="num">0</td></tr>
           <tr><td>Total Cash Fisik</td><td id="total-cash-fisik" class="num">0</td></tr>
+          <tr><td>Total Cash Setoran</td><td id="total-cash-setoran" class="num">0</td></tr>
           <tr><td>Subtotal</td><td id="subtotal" class="num">0</td></tr>
           <tr><td>Grand Total</td><td id="grandtotal" class="num">0</td></tr>
           <tr><td style="color:#2563eb;">Plus / Minus</td><td id="plusminus" class="num">0</td></tr>
@@ -673,6 +674,7 @@
     document.getElementById("grandtotal").textContent = fmt(grand);
 
     const cashSeharusnya = totalPenjualan - totalNonCash - totalTransfer - totalBiaya;
+    document.getElementById("total-cash-setoran").textContent = fmt(cashSeharusnya);
     const plusMinus = cashFisik - cashSeharusnya;
     document.getElementById("plusminus").textContent = fmt(plusMinus);
 
